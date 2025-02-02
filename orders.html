@@ -131,11 +131,18 @@
     <h1>Orders List</h1>
 
     <!-- Order Stats Section -->
-    <div class="stats">
-        <div><strong>Total Orders:</strong> <span id="total-orders">0</span></div>
-        <div><strong>Pending Orders:</strong> <span id="pending-orders">0</span></div>
-        <div><strong>Completed Orders:</strong> <span id="completed-orders">0</span></div>
-    </div>
+<div class="stats">
+    <div><strong>Total Orders:</strong> <span id="total-orders">0</span></div>
+    <div><strong>Pending Orders:</strong> <span id="pending-orders">0</span></div>
+    <div><strong>Completed Orders:</strong> <span id="completed-orders">0</span></div>
+</div>
+
+<div class="stats">
+    <div><strong>Total Earnings:</strong> <span id="total-earnings">0</span></div>  
+  
+</div>
+
+
 
 <input type="text" id="search-bar" placeholder="Search by Order ID or Customer Name" 
     style="width: 95%; padding: 10px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 5px;">
@@ -173,7 +180,8 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
-    import { getFirestore, collection, getDocs, doc, updateDoc,deleteDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, updateDoc,deleteDoc
+    ,setDoc , getDoc } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
     // Firebase configuration
     const firebaseConfig = {
@@ -220,31 +228,34 @@ async function loadOrders() {
             const orderDate = order.orderDate || "N/A";
             const orderStatus = order.orderStatus || "Unfulfilled";
 
-            // Increment order counts
-            totalOrders++;
-            if (orderStatus !== "Delivered") {
-                pendingOrders++;
-            } else {
-                completedOrders++;
-            }
+// Increment order counts
+totalOrders++;
+
+// Check if the order is either delivered or returned to be marked as completed
+if (orderStatus === "Delivered" || orderStatus === "Returned") {
+    completedOrders++; // Increment completed orders for delivered or returned status
+} else {
+    pendingOrders++; // Everything else is considered pending (incomplete)
+}
 
             const row = `
-                <tr data-order-id="${orderId}" data-customer-name="${customerName.toLowerCase()}">
-                    <td>${orderId}</td>
-                    <td>${customerName}</td> <!-- Display Customer Name -->
-                    <td>${new Date(orderDate).toLocaleString()}</td>
-                    <td>
-                        <select class="order-status-dropdown" data-order-id="${orderId}">
-                            <option value="Unfulfilled" ${orderStatus === "Unfulfilled" ? "selected" : ""}>Unfulfilled</option>
-                            <option value="In creation" ${orderStatus === "In creation" ? "selected" : ""}>In creation</option>
-                            <option value="Shipped" ${orderStatus === "Shipped" ? "selected" : ""}>Shipped</option>
-                            <option value="In transit" ${orderStatus === "In transit" ? "selected" : ""}>In transit</option>
-                            <option value="Delivered" ${orderStatus === "Delivered" ? "selected" : ""}>Delivered</option>
-                        </select>
-                    </td>
-                    <td><span class="toggle-details">View Details</span></td>
-                </tr>
-            `;
+    <tr data-order-id="${orderId}" data-customer-name="${customerName.toLowerCase()}">
+        <td>${orderId}</td>
+        <td>${customerName}</td>
+        <td>${new Date(orderDate).toLocaleString()}</td>
+        <td>
+            <select class="order-status-dropdown" data-order-id="${orderId}">
+                <option value="Unfulfilled" ${orderStatus === "Unfulfilled" ? "selected" : ""}>Processing Order</option>
+                <option value="In creation" ${orderStatus === "In creation" ? "selected" : ""}>In creation</option>
+                <option value="Shipped" ${orderStatus === "Shipped" ? "selected" : ""}>Shipped</option>
+                <option value="In transit" ${orderStatus === "In transit" ? "selected" : ""}>In transit</option>
+                <option value="Delivered" ${orderStatus === "Delivered" ? "selected" : ""}>Delivered</option>
+                <option value="Returned" ${orderStatus === "Returned" ? "selected" : ""}>Returned</option>
+            </select>
+        </td>
+        <td><span class="toggle-details">View Details</span></td>
+    </tr>
+`;
             ordersTable.innerHTML += row;
         });
 
@@ -312,20 +323,41 @@ async function searchOrders() {
     
 
     // Function to update the order status in Firebase
-    async function updateOrderStatus(orderId, status) {
-        try {
-            const orderRef = doc(db, "orders", orderId);
-            await updateDoc(orderRef, {
-                orderStatus: status
-            });
+async function updateOrderStatus(orderId, status) {
+    try {
+        const orderRef = doc(db, "orders", orderId);
+        await updateDoc(orderRef, {
+            orderStatus: status
+        });
 
+        if (status === "Delivered") {
+            const amount = parseFloat(prompt("Enter the amount earned from this order:"));
+            if (!isNaN(amount) && amount > 0) {
+                await updateTotalEarnings(amount); // Add to total earnings
+                alert("Order status and total earnings updated successfully.");
+            } else {
+                alert("Invalid amount. Earnings not updated.");
+            }
+        } else if (status === "Returned") {
+            const amount = parseFloat(prompt("Enter the amount to be deducted (returned):"));
+            if (!isNaN(amount) && amount > 0) {
+                await updateTotalEarnings(-amount); // Deduct from total earnings
+                alert("Order status updated and amount deducted from total earnings.");
+            } else {
+                alert("Invalid amount. Earnings not updated.");
+            }
+        } else {
             alert("Order status updated successfully.");
-            loadOrders();  // Reload the orders list to reflect updated counts
-        } catch (error) {
-            console.error("Error updating order status:", error);
-            alert("Failed to update order status.");
         }
+
+        loadOrders(); // Reload the orders list to reflect updated counts and earnings
+        loadTotalEarnings();
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        alert("Failed to update order status.");
     }
+}
+
     
     
     async function deleteOrder(orderId) {
@@ -393,9 +425,53 @@ document.getElementById("cancel-order-btn").addEventListener("click", () => {
     document.getElementById("close-modal").addEventListener("click", () => {
         document.getElementById("order-modal").style.display = "none";
     });
+    
+  async function updateTotalEarnings(amount) {
+    try {
+        const earningsRef = doc(db, "earnings", "totalEarnings");
+        const earningsDoc = await getDoc(earningsRef);
 
-    // Call the loadOrders function when the page is loaded
-    window.onload = loadOrders;
+        if (earningsDoc.exists()) {
+            // Update existing earnings
+            const currentEarnings = earningsDoc.data().total || 0;
+            await updateDoc(earningsRef, {
+                total: currentEarnings + amount
+            });
+        } else {
+            // Create new earnings document
+            await setDoc(earningsRef, {
+                total: amount
+            });
+        }
+    } catch (error) {
+        console.error("Error updating total earnings:", error);
+        alert("Failed to update total earnings.");
+    }
+}
+
+async function loadTotalEarnings() {
+    try {
+        const earningsRef = doc(db, "earnings", "totalEarnings");
+        const earningsDoc = await getDoc(earningsRef);
+
+        if (earningsDoc.exists()) {
+            const totalEarnings = earningsDoc.data().total || 0;
+            document.getElementById("total-earnings").textContent = totalEarnings.toFixed(2);
+        } else {
+            document.getElementById("total-earnings").textContent = "0.00";
+        }
+    } catch (error) {
+        console.error("Error loading total earnings:", error);
+        alert("Failed to load total earnings.");
+    }
+}
+window.onload = async () => {
+    await loadOrders();
+    await loadTotalEarnings();
+};
+    
+
+    
 </script>
 
 <script>
