@@ -137,10 +137,15 @@
     <div><strong>Completed Orders:</strong> <span id="completed-orders">0</span></div>
 </div>
 
+
+
+
+<!-- Add this with your other stats -->
 <div class="stats">
-    <div><strong>Total Earnings:</strong> <span id="total-earnings">0</span></div>  
-  
+    <div><strong>Total Earnings:</strong> <span id="total-earnings">0</span></div>
+    <div><strong>Pending Payments:</strong> <span id="pending-payments">0</span></div>
 </div>
+
 
 
 
@@ -173,6 +178,8 @@
         <div id="order-details">
             <!-- Detailed order information will be displayed here -->
         </div>
+        <!-- Add this in the order details HTML -->
+
     </div>
 </div>
 
@@ -206,6 +213,7 @@ async function loadOrders() {
         const totalOrdersCount = document.getElementById("total-orders");
         const pendingOrdersCount = document.getElementById("pending-orders");
         const completedOrdersCount = document.getElementById("completed-orders");
+        const pendingPaymentsElement = document.getElementById("pending-payments"); // Moved up
 
         const ordersCollection = collection(db, "orders");
         const snapshot = await getDocs(ordersCollection);
@@ -213,6 +221,13 @@ async function loadOrders() {
         if (snapshot.empty) {
             console.log("No orders found!");
             ordersTable.innerHTML = "<tr><td colspan='5'>No orders available.</td></tr>";
+                 // Add debug logs
+            
+            // Reset all values to zero
+            totalOrdersCount.textContent = 0;
+            pendingOrdersCount.textContent = 0;
+            completedOrdersCount.textContent = 0;
+            pendingPaymentsElement.textContent = 0;
             return;
         }
 
@@ -220,23 +235,32 @@ async function loadOrders() {
         let totalOrders = 0;
         let pendingOrders = 0;
         let completedOrders = 0;
+        let pendingPayments = 0;
+        // In the variable declarations at the top of loadOrders
+
 
         snapshot.forEach((doc) => {
             const order = doc.data();
+            console.log("Processing order:", doc.id);
+            console.log("Order status:", order.orderStatus);
+            console.log("Final Total:", order.finalTotal);
+            console.log("Parsed Final Total:", parseFloat(order.finalTotal));
             const orderId = doc.id;
             const customerName = order.shippingAddress?.name || "N/A";
             const orderDate = order.orderDate || "N/A";
             const orderStatus = order.orderStatus || "Unfulfilled";
+            const finalTotal = parseFloat(order.finalTotal) || 0;
 
-// Increment order counts
-totalOrders++;
+            totalOrders++;
 
-// Check if the order is either delivered or returned to be marked as completed
-if (orderStatus === "Delivered" || orderStatus === "Returned") {
-    completedOrders++; // Increment completed orders for delivered or returned status
-} else {
-    pendingOrders++; // Everything else is considered pending (incomplete)
-}
+            if (orderStatus === "Delivered" || orderStatus === "Returned") {
+                completedOrders++;
+            } else {
+                pendingOrders++;
+                pendingPayments += finalTotal;
+                console.log("Adding to pending payments:", finalTotal);
+                console.log("Current pending total:", pendingPayments);
+            }
 
             const row = `
     <tr data-order-id="${orderId}" data-customer-name="${customerName.toLowerCase()}">
@@ -259,12 +283,13 @@ if (orderStatus === "Delivered" || orderStatus === "Returned") {
             ordersTable.innerHTML += row;
         });
 
-        // Update order stats
+        // Update all stats
         totalOrdersCount.textContent = totalOrders;
         pendingOrdersCount.textContent = pendingOrders;
         completedOrdersCount.textContent = completedOrders;
+        pendingPaymentsElement.textContent = pendingPayments.toFixed(2);
 
-        // Add event listener for clicking "View Details"
+        // Event listeners
         document.querySelectorAll(".toggle-details").forEach(element => {
             element.addEventListener("click", (e) => {
                 e.stopPropagation();
@@ -273,13 +298,12 @@ if (orderStatus === "Delivered" || orderStatus === "Returned") {
                 const modal = document.getElementById("order-modal");
 
                 if (modal.style.display === "none" || modal.getAttribute('data-order-id') !== orderId) {
-                    showOrderDetails(orderId); // Function to show details
-                    modal.style.display = "flex"; // Show modal
+                    showOrderDetails(orderId);
+                    modal.style.display = "flex";
                 }
             });
         });
 
-        // Add event listener for status change with password check
         document.querySelectorAll(".order-status-dropdown").forEach(dropdown => {
             dropdown.addEventListener("change", async (e) => {
                 const orderId = e.target.getAttribute("data-order-id");
@@ -290,12 +314,11 @@ if (orderStatus === "Delivered" || orderStatus === "Returned") {
                     await updateOrderStatus(orderId, newStatus);
                 } else {
                     alert("Incorrect password.");
-                    e.target.value = e.target.defaultValue; // Reset selection
+                    e.target.value = e.target.defaultValue;
                 }
             });
         });
 
-        // Add search functionality
         document.getElementById("search-bar").addEventListener("input", searchOrders);
 
     } catch (error) {
@@ -303,6 +326,9 @@ if (orderStatus === "Delivered" || orderStatus === "Returned") {
         alert("Failed to load orders. Check console for details.");
     }
 }
+
+
+    
   
 async function searchOrders() {
     const searchQuery = document.getElementById("search-bar").value.toLowerCase().trim();
@@ -323,41 +349,47 @@ async function searchOrders() {
     
 
     // Function to update the order status in Firebase
-async function updateOrderStatus(orderId, status) {
+async function updateOrderStatus(orderId, newStatus) {
     try {
         const orderRef = doc(db, "orders", orderId);
-        await updateDoc(orderRef, {
-            orderStatus: status
-        });
+        const orderSnap = await getDoc(orderRef);
+        const orderData = orderSnap.data();
+        const previousStatus = orderData.orderStatus;
+        const finalTotal = parseFloat(orderData.finalTotal) || 0;
 
-        if (status === "Delivered") {
-            const amount = parseFloat(prompt("Enter the amount earned from this order:"));
-            if (!isNaN(amount) && amount > 0) {
-                await updateTotalEarnings(amount); // Add to total earnings
-                alert("Order status and total earnings updated successfully.");
-            } else {
-                alert("Invalid amount. Earnings not updated.");
-            }
-        } else if (status === "Returned") {
-            const amount = parseFloat(prompt("Enter the amount to be deducted (returned):"));
-            if (!isNaN(amount) && amount > 0) {
-                await updateTotalEarnings(-amount); // Deduct from total earnings
-                alert("Order status updated and amount deducted from total earnings.");
-            } else {
-                alert("Invalid amount. Earnings not updated.");
-            }
-        } else {
-            alert("Order status updated successfully.");
+        // Calculate the net change in earnings
+        let earningsChange = 0;
+
+        // Remove impact of previous status
+        if (previousStatus === "Delivered") {
+            earningsChange -= finalTotal;
+        } 
+
+        // Add impact of new status
+        if (newStatus === "Delivered") {
+            earningsChange += finalTotal;
+        } else if (newStatus === "Returned") {
+            
+        }
+        
+        
+
+        // Apply the net change
+        if (earningsChange !== 0) {
+            await updateTotalEarnings(earningsChange);
         }
 
-        loadOrders(); // Reload the orders list to reflect updated counts and earnings
+        // Update the status
+        await updateDoc(orderRef, { orderStatus: newStatus });
+
+        alert("Order status updated successfully!");
+        loadOrders();
         loadTotalEarnings();
     } catch (error) {
         console.error("Error updating order status:", error);
         alert("Failed to update order status.");
     }
 }
-
     
     
     async function deleteOrder(orderId) {
@@ -406,7 +438,15 @@ async function updateOrderStatus(orderId, status) {
     <div><strong>Order Date:</strong> ${new Date(order.orderDate).toLocaleString()}</div>
     <div><strong>Cart Items:</strong> ${order.cartItems ? order.cartItems.items.map(item => `${item.productName} (x${item.quantity})`).join("<br>") : "No items"}</div>
     <div><strong>Order Status:</strong> ${order.orderStatus || "Unfulfilled"}</div>
+    <div><strong>Final Total:</strong> ${order.finalTotal || "N/A"}</div>
+    
     <button id="cancel-order-btn" style="margin-top: 20px; padding: 10px; background-color: #ff4d4d; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel Order</button>
+    <button id="whatsapp-btn" style="padding: 10px; background-color: #25D366; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            Send WhatsApp Update
+        </button>
+         <button id="shipping-update-btn" style="padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            📦
+        </button>
 `;
 
 document.getElementById("cancel-order-btn").addEventListener("click", () => {
@@ -414,6 +454,70 @@ document.getElementById("cancel-order-btn").addEventListener("click", () => {
   deleteOrder(orderId);
 });
 
+
+// Add WhatsApp message functionality
+document.getElementById("whatsapp-btn").addEventListener("click", () => {
+    const contactNumber = order.contactNumber;
+    if (!contactNumber) {
+        alert("No contact number available!");
+        return;
+    }
+
+    // Format products list without prices
+    const products = order.cartItems?.items.map(item => 
+        `${item.productName} (Qty: ${item.quantity})`  // Removed price calculation
+    ).join("\n") || "No items";
+
+    // Create message template
+    const message = `Thank you for shopping with us! 🛍️\n
+    
+*Order ID:* ${orderId}\n
+*Products:*\n${products}\n
+*Total Amount:* ₹${order.finalTotal}\n
+If you have any questions, reach out to us at themacramelofts@gmail.com or contact us directly on +918393877531
+
+We'll keep you updated on your order status. Stay tuned! 📦`;
+
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Remove any non-digit characters from phone number
+    const cleanNumber = contactNumber.replace(/\D/g,'');
+    
+    // Create WhatsApp URL
+    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+});
+
+// Add Shipping Update functionality
+document.getElementById("shipping-update-btn").addEventListener("click", () => {
+    const contactNumber = order.contactNumber;
+    if (!contactNumber) return; // If no contact number, exit the function
+
+    // Create an empty message template for shipping details
+    let message = `Your order ${orderId} has been shipped! 🚚\n\n`;
+    message += `*Tracking Number:* [Enter tracking number]\n`;
+    message += `*Tracking Link:* [Enter tracking URL (optional)]\n`;
+    message += `*Estimated Delivery:* [Enter estimated delivery days (e.g., 3-5 days)]\n\n`;
+    message += "Thank you for your patience!";
+
+    // Clean and validate phone number
+    const cleanNumber = contactNumber.replace(/\D/g, ''); // Remove all non-digits
+    if (!cleanNumber) return; // If the number is invalid, exit the function
+
+    // Create WhatsApp URL with the message
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
+    
+    // Create temporary link to bypass pop-up blockers
+    const link = document.createElement('a');
+    link.href = whatsappUrl;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});
      
         } catch (error) {
             console.error("Error fetching order details:", error);
