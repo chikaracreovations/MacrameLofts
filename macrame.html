@@ -1333,7 +1333,7 @@ p4 {
     'Macrame Wall Hanging 1',
     ['images/1.jpg', 'images/p2.jpg', 'images/product1-image3.jpg'],
     'Beautiful handmade macrame wall hanging made with premium cotton threads. Perfect for adding warmth and elegance to your home décor.',
-    199,
+    149,
     [
         { name: 'John Doe', rating: 5, comment: 'Absolutely stunning! The quality is amazing.' },
         { name: 'Jane Smith', rating: 4, comment: 'Beautiful piece, worth the wait.' }
@@ -1341,9 +1341,9 @@ p4 {
 )">
     <img src="images/1.jpg" alt="Macrame Wall Hanging 1">
     <h3>Macrame Wall Hanging 1</h3>
-    <p>₹199</p>
-    <button onclick="event.stopPropagation(); addToCart('Macrame Wall Hanging 1', 199)">Add to Cart</button>
-    <button class="buy-now" onclick="event.stopPropagation(); buyNow('Macrame Wall Hanging 1', 199)">Buy Now</button>
+    <p>₹149</p>
+    <button onclick="event.stopPropagation(); addToCart('Macrame Wall Hanging 1', 149)">Add to Cart</button>
+    <button class="buy-now" onclick="event.stopPropagation(); buyNow('Macrame Wall Hanging 1', 149)">Buy Now</button>
 </div>
 
 <!-- Product 2 -->
@@ -1596,7 +1596,7 @@ p4 {
     'Macrame Wall Hanging 15',
     ['images/15.jpg', 'images/15.1.jpg', 'images/15.2.jpg'],
     'Elegant handmade macrame wall hanging to enhance your home decor.',
-    449,
+    599,
     [
         { name: 'Sophia Adams', rating: 5, comment: 'Absolutely love this piece! Worth every penny.' },
         { name: 'Daniel Brown', rating: 4, comment: 'Great design, but delivery took longer than expected.' }
@@ -1605,9 +1605,9 @@ p4 {
   <div class="badge">New Arrival</div>
   <img src="images/15.jpg" alt="Macrame Wall Hanging 15">
   <h3>Macrame Wall Hanging 15</h3>
-  <p>₹449</p>
-  <button onclick="event.stopPropagation(); addToCart('Macrame Wall Hanging 15', 449)">Add to Cart</button>
-  <button class="buy-now" onclick="event.stopPropagation(); buyNow('Macrame Wall Hanging 15', 449)">Buy Now</button>
+  <p>₹599</p>
+  <button onclick="event.stopPropagation(); addToCart('Macrame Wall Hanging 15', 599)">Add to Cart</button>
+  <button class="buy-now" onclick="event.stopPropagation(); buyNow('Macrame Wall Hanging 15', 599)">Buy Now</button>
 </div>
 
 <!-- Product 16 -->
@@ -2210,7 +2210,7 @@ function applyDiscount() {
         total += item.price * item.quantity;
     });
 
-    tax = total * 0.03; // 10% tax
+    tax = total * 0.02; // 10% tax
     const discountAmount = total * discount;
     const finalTotal = total + tax + shipping - discountAmount;
 
@@ -2276,7 +2276,7 @@ function openProductPage(productName, images, description, price, reviews) {
     // Update product details
     productNameElement.textContent = productName;
     productDescriptionElement.textContent = description;
-    productPriceElement.textContent = `$${price.toFixed(2)}`;
+    productPriceElement.textContent = `₹${price.toFixed(2)}`;
 
     // Update the reviews section
     productReviews.innerHTML = `
