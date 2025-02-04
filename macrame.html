@@ -2032,6 +2032,18 @@ p4 {
         <input type="text" id="state" placeholder="Enter state" required />
     </div>
 </div>
+
+<br>
+
+
+     <!-- Checkbox to save data for future use -->
+            <div class="checkbox-container">
+                <input type="checkbox" id="saveDataCheckbox" />
+                <label for="saveDataCheckbox">Save for future use</label>
+            </div>
+        </form>
+    </div>
+
     
     <!-- Bill Breakdown -->
     <div id="bill-breakdown">
@@ -2051,6 +2063,7 @@ p4 {
             <input type="text" id="discount-code" placeholder="Enter code" />
             <button onclick="applyDiscount()">Apply</button>
         </div>
+        
         
         <div class="bill-row">
             <p id="final-total">Final Total: ₹0.00</p>
@@ -2169,11 +2182,12 @@ p4 {
             <label>Payment Method</label>
             <select id="payment-method">
               <option value="cod">Cash on Delivery</option>
-                <option value="credit-card">Credit Card [Not Available]</option>
-                <option value="upi">UPI[Not Available]</option>
-
+              <option value="upi">UPI</option>
+             <option value="credit-card">Credit/Debit Card</option>
+                <option value="net-banking">Net Banking</option>
             </select>
         </div>
+
 
         <!-- Order Summary -->
         <div id="order-summary">
@@ -2188,8 +2202,13 @@ p4 {
                 <p id="final-total">Final Total: ₹0.00</p>
             </div>
         </div>
+        
+        <br>
+        
 
-<button id="rzp-button1" style="display:none;">Pay with Razorpay</button>
+<button id="rzp-button1" style="display:none; background-color: #2196f3; color: white; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 18px;" onclick="validateOnlineOrder()">Pay with Razorpay</button>
+
+
 
 
         <!-- Place Order Button -->
@@ -2324,6 +2343,9 @@ const productData = {
    'Macrame Wall Hanging 16': { price: 499, image: 'images/16.jpg' },
     'Macrame Wall Hanging 17': { price: 249, image: 'images/17.jpg' },
     'Macrame Wall Hanging 18': { price: 799, image: 'images/18.jpg' },
+       'Macrame Wall Hanging 19': { price: 499, image: 'images/19.jpg' },
+    'Macrame Wall Hanging 20': { price: 249, image: 'images/20.jpg' },
+    'Macrame Wall Hanging 21': { price: 799, image: 'images/21.jpg' },
 };
 
 function showSection(...sectionIds) {
@@ -2360,7 +2382,7 @@ function updateCart() {
 
     let total = 0;
     let tax = 0;
-    let shipping = 40.00;
+    let shipping = 0.00;
     let totalQuantity = 0; // Variable to store total quantity of all items
 
     if (cart.length === 0) {
@@ -2396,7 +2418,7 @@ function updateCart() {
         totalQuantity += item.quantity; // Increase total quantity count
     });
 
-    tax = total * 0.03; // 10% tax
+    tax = total * 0.00; // 10% tax
     const finalTotal = total + tax + shipping;
 
     document.getElementById('cart-total').innerText = `Total: ₹${total.toFixed(2)}`;
@@ -2440,18 +2462,18 @@ function applyDiscount() {
     let discount = 0;
     
     if (discountCode === 'DISCOUNT10') {
-        discount = 0.10; // 10% discount
+        discount = 0.99; // 10% discount
     }
     
     let total = 0;
     let tax = 0;
-    let shipping = 40.00;
+    let shipping = 0.00;
 
     cart.forEach(item => {
         total += item.price * item.quantity;
     });
 
-    tax = total * 0.03; // 10% tax
+    tax = total * 0.00; // 10% tax
     const discountAmount = total * discount;
     const finalTotal = total + tax + shipping - discountAmount;
 
@@ -2701,8 +2723,11 @@ const orderDetails = {
         console.error("Error sending email:", error);
         
     });
+    
 }
 // Function to get cart data (mock function)
+
+
 function getCartData() {
     // Getting shipping address data from the input fields
     const shippingAddress = {
@@ -2893,17 +2918,6 @@ function sendChatMessage() {
     });
 }
 
-document.getElementById('checkout-contact').addEventListener('input', function(e) {
-    let value = e.target.value;
-
-    // Only allow digits after +91 and ensure +91 is not typed again
-    if (!value.startsWith('+91')) {
-        e.target.value = '+91' + value.replace(/^(\+91)/, '');  // Fixes case if the user deletes +91
-    }
-
-    // Keep only numeric characters after +91, and limit to 10 digits
-    e.target.value = '+91' + value.slice(3).replace(/[^0-9]/g, '').slice(0, 10);
-});
 
 
   </script>
@@ -2912,7 +2926,8 @@ document.getElementById('checkout-contact').addEventListener('input', function(e
     // Import Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-analytics.js";
-    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc  } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+    
 
     // Firebase configuration
     const firebaseConfig = {
@@ -2939,6 +2954,8 @@ document.getElementById('checkout-contact').addEventListener('input', function(e
             const ordersCollection = collection(db, "orders"); // Reference Firestore collection
             const docRef = await addDoc(ordersCollection, orderDetails);
             alert(`Order placed successfully! Order ID: ${docRef.id}`);
+            window.location.replace(`confirmation.html?orderId=${docRef.id}`);
+            
         } catch (error) {
             console.error("Error saving order to Firestore:", error);
             alert("Failed to place the order. Please try again.");
@@ -2976,10 +2993,190 @@ document.getElementById('checkout-contact').addEventListener('input', function(e
             console.error("Error loading orders:", error);
         }
     }
+ 
+ async function payNow() {
+    // Get User Details
+    const contactNumber = document.getElementById("checkout-contact").value;
+    const shippingAddress = {
+        name: document.getElementById("checkout-name").value,
+        email: document.getElementById("checkout-email").value,
+        address: document.getElementById("checkout-address").value,
+        address2: document.getElementById("checkout-address2").value,
+        pincode: document.getElementById("checkout-pincode").value,
+        city: document.getElementById("checkout-city").value,
+        state: document.getElementById("checkout-state").value,
+        total: document.getElementById("final-total").innerText,
+    };
+
+    // Create order object with numeric finalTotal
+    const formattedTotal = document.getElementById('final-total').innerText.trim();
+    const numericTotal = parseFloat(
+        formattedTotal
+            .replace(/[^0-9.]/g, '') // Remove currency symbols
+            .replace(/,/g, '')       // Remove thousand separators
+    ) || 0;
+
+    try {
+        // ✅ Razorpay Payment Integration
+        var options = {
+            "key": "rzp_live_FwIm6UiuYORW1Z", // Replace with your Razorpay Key
+            "amount": numericTotal * 100, // Convert ₹ to paise
+            "currency": "INR",
+            "name": "The Macrame Lofts",
+            "description": "Order Payment",
+            "prefill": {
+                "name": shippingAddress.name,
+                "email": shippingAddress.email,
+                "contact": contactNumber
+            },
+            "theme": { "color": "#3399cc" },
+            "handler": async function (response) {
+                alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+
+                // ✅ Now Create the Order in Firestore after Payment is successful
+                const db = getFirestore(); // Ensure you have Firestore instance
+                try {
+                    // Create Order in Firestore (using modular syntax)
+                    const orderRef = await addDoc(collection(db, "orders"), {
+                        contactNumber,
+                        shippingAddress,
+                        paymentMethod: "Online",
+                        cartItems: getCartData(),  // Assuming you have a function that returns cart data
+                        orderDate: new Date().toISOString(),
+                        finalTotal: numericTotal,
+                        orderStatus: "Paid", // Set the order status to Paid
+                        paymentId: response.razorpay_payment_id, // Save the Razorpay Payment ID
+                    });
+
+                    console.log("Order Created with ID:", orderRef.id);
+                    
+                window.location.replace(`confirmation.html?orderId=${orderRef.id}&paymentId=${response.razorpay_payment_id}`);
+                
+                
+                } catch (error) {
+                    console.error("Error creating order in Firestore:", error);
+                    alert("An error occurred while creating your order. Please try again.");
+                }
+            },
+            "modal": {
+                "ondismiss": function () {
+                    alert("Payment Cancelled  Order Not Placed. Please try again");
+                }
+            }
+        };
+
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+
+    } catch (error) {
+        console.error("Error placing order or processing payment:", error);
+        alert("An error occurred while processing your order. Please try again.");
+    }
+}
+
+
+function validateOnlineOrder() {
+    // Check if all required fields are filled
+    const requiredFields = [
+        'checkout-name', 'checkout-email', 'checkout-address', 'checkout-pincode',
+        'checkout-city', 'checkout-state'
+        , 'checkout-contact'
+    ];
+
+    // If billing address is different, validate those fields as well
+    if (!document.getElementById('same-as-shipping').checked) {
+        requiredFields.push('billing-name', 'billing-email', 'billing-address', 'billing-pincode', 'billing-city', 'billing-state');
+    }
+
+    // Loop through each required field and check if it's empty
+    for (let fieldId of requiredFields) {
+        const field = document.getElementById(fieldId);
+        if (!field.value.trim()) {
+            alert("Please fill all the required fields.");
+            return false;
+        }
+    }
+
+    // If validation passes, proceed with placing the order
+    payNow();
+    return true;
+}
+  
+    
 
     // Expose loadOrders globally
     window.loadOrders = loadOrders;
+    window.payNow = payNow;
+    window.validateOnlineOrder = validateOnlineOrder;
 </script>
+
+
+<script>
+document.getElementById("payment-method").addEventListener("change", function() {
+    let selectedMethod = this.value;
+    let placeOrderBtn = document.querySelector(".place-order-btn");
+    let razorpayBtn = document.getElementById("rzp-button1");
+
+    if (selectedMethod !== "cod") {
+        placeOrderBtn.style.display = "none";  // Hide Place Order Button
+        razorpayBtn.style.display = "block";   // Show Razorpay Button
+    } else {
+        placeOrderBtn.style.display = "block";
+        razorpayBtn.style.display = "none";
+    }
+});
+</script>
+
+   <script>
+        // Function to save form data and checkbox state to localStorage
+        function saveFormDataToLocalStorage() {
+            const formData = {
+                name: document.getElementById('name').value || '',
+                email: document.getElementById('email').value || '',
+                address: document.getElementById('address1').value || '',
+                address2: document.getElementById('address2').value || '',
+                pincode: document.getElementById('pincode').value || '',
+                city: document.getElementById('city').value || '',
+                state: document.getElementById('state').value || '',
+            };
+
+            const saveData = document.getElementById('saveDataCheckbox').checked;
+
+            // Save form data and checkbox state to localStorage
+            localStorage.setItem('userFormData', JSON.stringify(formData));
+            localStorage.setItem('saveDataEnabled', JSON.stringify(saveData));
+        }
+
+        // Function to auto-fill form fields from localStorage if data exists
+        function fillFormFromLocalStorage() {
+            const savedData = JSON.parse(localStorage.getItem('userFormData'));
+            const isSaveEnabled = JSON.parse(localStorage.getItem('saveDataEnabled'));
+
+            if (isSaveEnabled && savedData) {
+                // Fill form fields if data is saved and checkbox is checked
+                document.getElementById('name').value = savedData.name || '';
+                document.getElementById('email').value = savedData.email || '';
+                document.getElementById('address1').value = savedData.address || '';
+                document.getElementById('address2').value = savedData.address2 || '';
+                document.getElementById('pincode').value = savedData.pincode || '';
+                document.getElementById('city').value = savedData.city || '';
+                document.getElementById('state').value = savedData.state || '';
+                document.getElementById('saveDataCheckbox').checked = true;
+            } else {
+                // Ensure the checkbox is unchecked if no data is saved
+                document.getElementById('saveDataCheckbox').checked = false;
+            }
+        }
+
+        // Event listener to save data when checkbox is clicked
+        document.getElementById('saveDataCheckbox').addEventListener('change', saveFormDataToLocalStorage);
+
+        // Fill the form with data from localStorage when the page loads
+        window.onload = function() {
+            fillFormFromLocalStorage(); // Auto-fill the form on page load
+        };
+    </script>
+
 
 
   
