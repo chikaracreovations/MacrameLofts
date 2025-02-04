@@ -2382,7 +2382,7 @@ function updateCart() {
 
     let total = 0;
     let tax = 0;
-    let shipping = 0.00;
+    let shipping = 35.00;
     let totalQuantity = 0; // Variable to store total quantity of all items
 
     if (cart.length === 0) {
@@ -2467,7 +2467,7 @@ function applyDiscount() {
     
     let total = 0;
     let tax = 0;
-    let shipping = 0.00;
+    let shipping = 35.00;
 
     cart.forEach(item => {
         total += item.price * item.quantity;
@@ -2685,7 +2685,7 @@ const orderDetails = {
     cartItems: getCartData(),
     orderDate: new Date().toISOString(),
     finalTotal: numericTotal, // Add cleaned numeric value
-    orderStatus: "Unfulfilled" // Add initial status
+    orderStatus: "Unfulfilled[COD]" // Add initial status
 };
 
     // ✅ Ensure the module function is being called correctly
