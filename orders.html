@@ -269,12 +269,14 @@ async function loadOrders() {
         <td>${new Date(orderDate).toLocaleString()}</td>
         <td>
             <select class="order-status-dropdown" data-order-id="${orderId}">
-                <option value="Unfulfilled" ${orderStatus === "Unfulfilled" ? "selected" : ""}>Processing Order</option>
+                <option value="Unfulfilled[COD]" ${orderStatus === "Unfulfilled[COD]" ? "selected" : ""}>Unfulfilled[COD]</option>
+                  <option value="paid" ${orderStatus === "paid" ? "selected" : ""}>Unfulfilled[Paid]</option>
                 <option value="In creation" ${orderStatus === "In creation" ? "selected" : ""}>In creation</option>
                 <option value="Shipped" ${orderStatus === "Shipped" ? "selected" : ""}>Shipped</option>
                 <option value="In transit" ${orderStatus === "In transit" ? "selected" : ""}>In transit</option>
                 <option value="Delivered" ${orderStatus === "Delivered" ? "selected" : ""}>Delivered</option>
                 <option value="Returned" ${orderStatus === "Returned" ? "selected" : ""}>Returned</option>
+              
             </select>
         </td>
         <td><span class="toggle-details">View Details</span></td>
@@ -432,6 +434,7 @@ async function updateOrderStatus(orderId, newStatus) {
             orderDetails.innerHTML = `
     <div><strong>Name:</strong> ${name}</div>
     <div><strong>Email:</strong> ${email}</div>
+    <div><strong>Payment Id:</strong> ${order.paymentId || "N/A"}</div>
     <div><strong>Contact Number:</strong> ${order.contactNumber || "N/A"}</div>
     <div><strong>Shipping Address:</strong> ${order.shippingAddress ? `${order.shippingAddress.address}, ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.pincode}` : "N/A"}</div>
     <div><strong>Payment Method:</strong> ${order.paymentMethod || "N/A"}</div>
