@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
     <title>The Macrame Lofts</title>
     <!-- Include Swiper.js CSS and JS -->
 
@@ -22,6 +23,7 @@
   <script type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   
   
        <style>
@@ -42,6 +44,8 @@
     color: #2b2d42; /* Dark text color */
     border-bottom: 3px solid #e63946; /* Optional: Add a bottom border */
 }
+
+
 
         body {
             font-family: 'Lora', serif;
@@ -381,14 +385,22 @@ main {
         }
 
         .hero h2 {
-            font-size: 48px;
+            font-size: 30px;
             margin-bottom: 20px;
+            margin-left:111px;
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
         }
 
         .hero p {
             font-size: 20px;
+            color:black;
             margin-bottom: 30px;
+           background-color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+      opacity: 0.5;
         }
 
         .hero button {
@@ -1209,6 +1221,173 @@ p4 {
     background-color: #1d1f2b;
 }
 
+#macrame-products-section {
+    background: linear-gradient(to bottom, #fef6e4, #fef6e4);
+    padding: 60px 5%;
+    text-align: center;
+}
+
+.macrame-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+}
+
+.macrame-item {
+    background: floralwhite;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    padding: 25px;
+    max-width: 320px;
+    max-height: auto;
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.macrame-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.macrame-item img {
+    width: 100%;
+    height: 50%;
+    border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.macrame-item:hover img {
+    transform: scale(1.05);
+}
+
+.macrame-item h2 {
+    font-size: 20px;
+    margin: 18px 0 12px;
+    color: #333;
+    font-weight: 600;
+    
+}
+
+.macrame-item p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    padding: 0 0px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .macrame-container {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Featured Section Styling */
+#macrame-featured-section {
+    background: linear-gradient(135deg, #12125 0%, #fef6e4 100%);
+    padding: 80px 5%;
+    text-align: center;
+    border-radius: 15px;
+    margin: 6px auto;
+    max-width: 1100px;
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Subtle Hover Effect */
+#macrame-featured-section:hover {
+    transform: translateY(-5px);
+}
+
+/* Content Styling */
+.macrame-featured-content {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    color: #555;
+}
+
+/* Title Styling */
+.macrame-featured-content h2 {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    color: #6A5B95;
+    text-transform: uppercase;
+    font-family: 'Playfair Display', serif;
+    background: linear-gradient(90deg, #B993D6, #8CA6DB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeInUp 1s ease-in-out;
+    
+}
+
+/* Paragraph Styling */
+.macrame-featured-content p {
+    font-size: 18px;
+    line-height: 1.7;
+    margin-bottom: 1px;
+    font-family: 'Lora', serif;
+    color: #666;
+    animation: fadeInUp 1.2s ease-in-out;
+}
+
+
+/* Button Styling */
+.macrame-btn {
+    display: inline-block;
+    background: linear-gradient(90deg, #B993D6, #8CA6DB);
+    color: #fff;
+    font-size: 18px;
+    padding: 12px 26px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease-in-out;
+    animation: fadeInUp 1.4s ease-in-out;
+    box-shadow: 0 5px 15px rgba(185, 147, 214, 0.3);
+}
+
+/* Hover Effect */
+.macrame-btn:hover {
+    background: linear-gradient(90deg, #8CA6DB, #B993D6);
+    box-shadow: 0 8px 20px rgba(185, 147, 214, 0.5);
+    transform: scale(1.05);
+}
+
+/* Fade-In Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    #macrame-featured-section {
+        padding: 60px 5%;
+    }
+    .macrame-featured-content h2 {
+        font-size: 28px;
+    }
+    .macrame-featured-content p {
+        font-size: 16px;
+    }
+    .macrame-btn {
+        font-size: 16px;
+        padding: 10px 22px;
+    }
+}
+
         
     </style>
 </head>
@@ -1217,7 +1396,7 @@ p4 {
       The Macrame Lofts
         <nav>
             <ul>
-                <li><a href="#" onclick="showSection('home','home2','sale-timer')">Home</a></li>
+                <li><a href="#" onclick="showSection('home','home2','sale-timer','macrame-products-section','macrame-featured-section')">Home</a></li>
                 <li><a href="#" onclick="showSection('about')">About</a></li>
                 <li><a href="#" onclick="showSection('products')">Shop</a></li>
                 <li><a href="#" onclick="showSection('cart')">Cart (<span class="cart-count">0</span>)</a></li>
@@ -1233,10 +1412,14 @@ p4 {
     
 <!-- Home Section -->
 <section id="home" class="section hero active">
-    <h2>Welcome to The Macrame Lofts</h2>
-    <p>Elegant macrame décor for every home.</p>
+   <h2>Crafting Dreams, One Knot at a Time!</h2>
+    <p>Welcome to The Macrame Lofts
+      Elegant macrame décor for every home.</p>
     <button onclick="showSection('products')">Shop Now</button>
 </section>
+
+
+
 
 <section id="home2" class="section  active">
     <h2>Our Best Sellers</h2>
@@ -1299,6 +1482,44 @@ p4 {
         <button onclick="sendChatMessage()">Send</button>
     </div>
 </div>
+
+
+
+
+<section id="macrame-products-section" class="section  active">
+    <div class="macrame-container">
+      <h2>Key Items Used 🪡🧵</h2>
+      
+ <div class="macrame-item">
+   <img src="images/cord.jpg" alt="Cotton Cord">
+   <h2>Macrame Cotton Cord</h2>
+   <p>A macrame cotton cord with bead is a versatile crafting material that combines the art of macrame with the decorative touch of a bead. This cord is typically made of soft and pliable cotton, making it easy to work with for various DIY projects.</p>
+ </div>
+ 
+        <div class="macrame-item">
+            <img src="images/hookbead.jpg" alt="Hook and Bead">
+            <h2>Hook and Bead</h2>
+            <p>A macrame hook with a bead is a crafting tool that combines practicality and style. It has a pointed end for precise knotting and a decorative bead on the handle, serving both functional and aesthetic purposes.</p>
+        </div>
+        <div class="macrame-item">
+            <img src="images/cotton-thread-ring.jpg" alt="Cotton Thread with Ring">
+            <h2>Cotton Thread with Ring</h2>
+            <p>Cotton threads with a macrame ring refer to a set of materials used in macrame crafting. These threads are typically made of soft and natural cotton, making them ideal for creating intricate knotwork in macrame projects. The inclusion of a macrame ring adds a structural element to the design, allowing you to create various patterns and shapes in your creations.</p>
+        </div>
+       
+    </div>
+</section>
+
+<section id="macrame-featured-section" class="section  active">
+    <div class="macrame-featured-content">
+
+        <p>At <strong>Macrame Wall Hanging</strong>, we're more than a store; we're creators of enchantment. Our world revolves around the art of macrame, and we're here to weave elegance into your life. Step into a realm where threads tell stories, and every piece is a masterpiece.</p>
+
+    </div>
+</section>
+
+
+
 
 
             
@@ -1596,7 +1817,7 @@ p4 {
     'Macrame Wall Hanging 15',
     ['images/15.jpg', 'images/15.1.jpg', 'images/15.2.jpg'],
     'Elegant handmade macrame wall hanging to enhance your home decor.',
-    699,
+    449,
     [
         { name: 'Sophia Adams', rating: 5, comment: 'Absolutely love this piece! Worth every penny.' },
         { name: 'Daniel Brown', rating: 4, comment: 'Great design, but delivery took longer than expected.' }
@@ -1605,9 +1826,9 @@ p4 {
   <div class="badge">New Arrival</div>
   <img src="images/15.jpg" alt="Macrame Wall Hanging 15">
   <h3>Macrame Wall Hanging 15</h3>
-  <p>₹699</p>
-  <button onclick="event.stopPropagation(); addToCart('Macrame Wall Hanging 15', 699)">Add to Cart</button>
-  <button class="buy-now" onclick="event.stopPropagation(); buyNow('Macrame Wall Hanging 15', 699)">Buy Now</button>
+  <p>₹449</p>
+  <button onclick="event.stopPropagation(); addToCart('Macrame Wall Hanging 15', 449)">Add to Cart</button>
+  <button class="buy-now" onclick="event.stopPropagation(); buyNow('Macrame Wall Hanging 15', 449)">Buy Now</button>
 </div>
 
 <!-- Product 16 -->
@@ -1709,7 +1930,14 @@ p4 {
 </section>
 
 <section id="product-detail" class="section product-detail">
+<li style="list-style-type: none; text-align: right;">
+    <a href="#" onclick="showSection('products')" style="color: blue; text-decoration: underline;">Continue Shopping</a>
+</li>
+<br>
+
+
     <div class="product-gallery">
+      
         <div class="swiper-container">
             <div class="swiper-wrapper">
                 <div class="swiper-slide">
@@ -1761,6 +1989,9 @@ p4 {
 <!-- Cart Section -->
 <section id="cart" class="section">
     <h2>Your Cart</h2>
+    <li style="list-style-type: none; text-align: right;">
+  <a href="#" onclick="showSection('products')" style="color: blue; text-decoration: underline;">Continue Shopping</a>
+</li>
     <br>
     
     <!-- Cart Items -->
@@ -1825,6 +2056,9 @@ p4 {
             <p id="final-total">Final Total: ₹0.00</p>
         </div>
         
+    
+    
+    
        
         <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
     </div>
@@ -1934,9 +2168,9 @@ p4 {
         <div class="checkout-field">
             <label>Payment Method</label>
             <select id="payment-method">
-                <option value="cod">Cash on Delivery</option>
-                <option value="credit-card">Credit Card [Not available]</option>
-                <option value="upi">UPI [Not available]</option>
+              <option value="cod">Cash on Delivery</option>
+                <option value="credit-card">Credit Card [Not Available]</option>
+                <option value="upi">UPI[Not Available]</option>
 
             </select>
         </div>
@@ -1954,6 +2188,9 @@ p4 {
                 <p id="final-total">Final Total: ₹0.00</p>
             </div>
         </div>
+
+<button id="rzp-button1" style="display:none;">Pay with Razorpay</button>
+
 
         <!-- Place Order Button -->
         <button class="place-order-btn" onclick="validateOrder()">Place Order</button>
@@ -2084,6 +2321,9 @@ const productData = {
     'Macrame Wall Hanging 14': { price: 499, image: 'images/14.jpg' },
     'Macrame Wall Hanging 15': { price: 249, image: 'images/15.jpg' },
     'Macrame Wall Hanging 15': { price: 799, image: 'images/15.jpg' },
+   'Macrame Wall Hanging 16': { price: 499, image: 'images/16.jpg' },
+    'Macrame Wall Hanging 17': { price: 249, image: 'images/17.jpg' },
+    'Macrame Wall Hanging 18': { price: 799, image: 'images/18.jpg' },
 };
 
 function showSection(...sectionIds) {
@@ -2211,11 +2451,11 @@ function applyDiscount() {
         total += item.price * item.quantity;
     });
 
-    tax = total * 0.02; // 10% tax
+    tax = total * 0.03; // 10% tax
     const discountAmount = total * discount;
     const finalTotal = total + tax + shipping - discountAmount;
 
-    document.getElementById('final-total').innerText = `Final Total: ₹${finalTotal.toFixed(2)}`;
+    document.getElementById('final-total').innerText = `Final Total: $${finalTotal.toFixed(2)}`;
 }
         // Function to simulate placing an order (Checkout)
         function placeOrder() {
@@ -2514,9 +2754,21 @@ document.getElementById('final-total').innerHTML = document.getElementById('fina
 window.onload = function() {
     fillFormWithCartData();
 };
+
+
+
+
+
      
 function proceedToCheckout() {
     // First, call the function to show the checkout section
+
+    // Check if the cart is empty by verifying if the items array is empty
+    const cartData = getCartData(); // Get the cart data
+    if (cartData.items.length === 0) {
+        alert("Your cart is empty. Please add items to your cart before proceeding to checkout.");
+        return; // Stop the checkout process if the cart is empty
+    }
 
     // Check if all required fields are filled
     const requiredFields = [
@@ -2527,9 +2779,6 @@ function proceedToCheckout() {
     if (!document.getElementById('same-as-shipping').checked) {
         requiredFields.push('billing-name', 'billing-email', 'billing-address', 'billing-pincode', 'billing-city', 'billing-state');
     }
-    
-    
-    
 
     // Loop through each required field and check if it's empty
     for (let fieldId of requiredFields) {
@@ -2540,23 +2789,21 @@ function proceedToCheckout() {
         }
     }
 
-    // If validation passes, proceed with checkout (this can be your order placement logi
-    // Add any further logic here (e.g., redirection, form submission, etc.)
-      
+    // If validation passes, proceed with checkout (this can be your order placement logic)
     // Then, pre-fill the shipping address form with cart data
     fillFormWithCartData();
-        showSection('checkout');
+    showSection('checkout');
 
-// Add event listeners to the form fields to trigger validation before checko
-    
-    
-  
-}     
+    // Add event listeners to the form fields to trigger validation before checkout
+}
 // Ensure both #home and #home2 are active on page load
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('home').classList.add('active');
     document.getElementById('home2').classList.add('active');
     document.getElementById('sale-timer').classList.add('active');
+    document.getElementById('macrame-products-section').classList.add('active');
+    document.getElementById('macrame-featured-section').classList.add('active');
+    
 });
 
 function searchProducts() {
@@ -2646,6 +2893,19 @@ function sendChatMessage() {
     });
 }
 
+document.getElementById('checkout-contact').addEventListener('input', function(e) {
+    let value = e.target.value;
+
+    // Only allow digits after +91 and ensure +91 is not typed again
+    if (!value.startsWith('+91')) {
+        e.target.value = '+91' + value.replace(/^(\+91)/, '');  // Fixes case if the user deletes +91
+    }
+
+    // Keep only numeric characters after +91, and limit to 10 digits
+    e.target.value = '+91' + value.slice(3).replace(/[^0-9]/g, '').slice(0, 10);
+});
+
+
   </script>
   
 <script type="module">
@@ -2720,6 +2980,8 @@ function sendChatMessage() {
     // Expose loadOrders globally
     window.loadOrders = loadOrders;
 </script>
+
+
   
 </body>
 </html>
